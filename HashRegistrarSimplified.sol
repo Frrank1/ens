@@ -254,6 +254,9 @@ contract Registrar {
      * @param _hash The hash to start an auction on
      */    
     function startAuction(bytes32 _hash) inState(_hash, Mode.Open) registryOpen() {
+        // Don't start an auction for a name already owned in ENS
+        if(ens.owner(sha3(rootNode, _hash)) != 0) throw;
+        
         entry newAuction = _entries[_hash];
 
         // for the first month of the registry, make longer auctions

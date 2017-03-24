@@ -102,6 +102,17 @@ describe('SimpleHashRegistrar', function() {
 		], done);
 	});
 
+	it('will not start auctions for names owned in ENS', function(done) {
+		// Set name.eth as owned by accounts[0]
+		ens.setSubnodeOwnerAsync(0, web3.sha3('eth'), accounts[0], {from: accounts[0]})
+		.then((result) => ens.setSubnodeOwnerAsync(dotEth, web3.sha3('name'), accounts[0], {from: accounts[0]}))
+		.then((result) => ens.setOwnerAsync(dotEth, registrar.address, {from: accounts[0]}))
+		// Try and start an auction
+		.then((result) => registrar.startAuctionAsync(web3.sha3('name'), {from: accounts[0]}))
+		.then((result) => assert.fail("Expected exception"), (err) => assert.ok(err.toString().indexOf(utils.INVALID_JUMP) != -1, err))
+		.asCallback(done);
+	});
+
 	it('records bids', function(done) {
 		var bid = null;
 		async.series([
